@@ -4,14 +4,14 @@ const chalk = require('chalk');
 const fs = require('fs');
 
 const ascii = [
-`888b     d888                   d8b          `,
-`8888b   d8888                   Y8P          `,
-`88888b.d88888                                `,
-`888Y88888P888 888  888 .d8888b  888  .d8888b `,
-`888 Y888P 888 888  888 88K      888 d88P"    `,
-`888  Y8P  888 888  888 "Y8888b. 888 888      `,
-`888   "   888 Y88b 888      X88 888 Y88b.    `,
-`888       888  "Y88888  88888P' 888  "Y8888P `                                         
+    `888b     d888                   d8b          `,
+    `8888b   d8888                   Y8P          `,
+    `88888b.d88888                                `,
+    `888Y88888P888 888  888 .d8888b  888  .d8888b `,
+    `888 Y888P 888 888  888 88K      888 d88P"    `,
+    `888  Y8P  888 888  888 "Y8888b. 888 888      `,
+    `888   "   888 Y88b 888      X88 888 Y88b.    `,
+    `888       888  "Y88888  88888P' 888  "Y8888P `
 ]
 
 function fadeColors(colors) {
@@ -89,25 +89,25 @@ User: ${client.user.tag}
 
             console.log(`Successfully reloaded ${data.length} application (/) commands.`);
 
+            let db = JSON.parse(await fs.readFileSync("./commands.json", "utf-8"))
 
             data.forEach(async cmd => {
-                var db = JSON.parse(await fs.readFileSync("./commands.json", "utf-8"))
-                var cmdDb = db.find(x => x.name == cmd.name)
+                let cmdDb = db.find(x => x.name == cmd.name)
                 if (!cmdDb) {
                     db.push({ name: cmd.name, id: cmd.id })
-                    fs.writeFileSync("./commands.json", JSON.stringify(db, null, 2))
                 } else {
                     cmdDb.id = cmd.id
-                    fs.writeFileSync("./commands.json", JSON.stringify(db, null, 2))
                 }
 
                 console.log("------------------------ Created ------------------------\n", cmd.name)
             })
 
+            await fs.writeFileSync("./commands.json", JSON.stringify(db, null, 2))
+
 
             console.log("Commands created!")
         } else console.log("Commands creation disabled!")
-  
+
 
 
     }
