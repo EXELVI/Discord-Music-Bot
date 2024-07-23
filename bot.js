@@ -61,7 +61,7 @@ for (const folder of eventsFolders) {
     const eventsFiles = fs.readdirSync(`./events/${folder}`).filter(file => file.endsWith('.js'));
     for (const file of eventsFiles) {
         const event = require(`./events/${folder}/${file}`);
-        client.on(event.name, (...args) => event.execute(...args));
+        client.on(event.name, (...args) => event.execute(...args, client));
     }
 }
 //FUNCTIONS
@@ -96,7 +96,49 @@ process.on("unhandledRejection", err => {
 })
 
 
+//Distube 
 
+const status = queue =>
+    `Volume: \`${queue.volume}%\` | Filter: \`${queue.filters.names.join(', ') || 'Off'}\` | Loop: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'All Queue' : 'This Song') : 'Off'
+    }\` | Autoplay: \`${queue.autoplay ? 'On' : 'Off'}\``
+client.distube
+    .on('playSong', (queue, song) =>
+        queue.textChannel.send(
+            {
+                embeds: [new Discord.EmbedBuilder()
+                    .setTitle(`${client.emotes.play} Playing`)
+                    .setURL(song.url)
+                    .setDescription(`${song.name}`)
+                    .setImage(song.thumbnail)
+                    .addFields({ name: ' Duration', value: `${song.formattedDuration}`, inline: true }, { name: 'Requested by', value: `${song.user}`, inline: true })]
+            })
+    )
+    .on('addSong', (queue, song) => {
+        var embed = new Discord.EmbedBuilder()
+            .setTitle(`${client.emotes.play} Added to the queue`)
+            .setDescription(`${song.name}`)
+            .setURL(song.url)
+            .addFields({ name: 'Duration', value: `${song.formattedDuration}`, inline: true }, { name: 'Requested by', value: `${song.user}`, inline: true })
+            .setImage(song.thumbnail)
+        queue.textChannel.send({ embeds: [embed] })
+    })
+
+
+    .on('addList', (queue, playlist) =>
+        queue.textChannel.send(
+            {
+                embeds: [new Discord.EmbedBuilder()
+                    .setTitle(`${client.emotes.play} Added to the queue`)
+                    .setDescription(`${playlist.name}`)
+                    .addFields({ name: 'Duration', value: `${playlist.duration}`, inline: true }, { name: "Songs", value: playlist.songs.length, inline: true }, { name: 'Requested by', value: `${playlist.user}`, inline: true })]
+            }))
+    .on('error', (channel, e) => {
+        if (channel) channel.send(`${client.emotes.error} | There was an error: \`${e.slice(0, 1947)}\``)
+        else console.error(e)
+    })
+    .on('empty', channel => channel.send('Channel is empty, leaving the channel'))
+    .on('searchNoResult', (message, query) => message.channel.send(`${client.emotes.error} |  No result found for ${query}!`))
+    .on('finish', queue => queue.textChannel.send('Finished!'))
 
 
 client.login(process.env.token)
