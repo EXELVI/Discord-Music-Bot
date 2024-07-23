@@ -1,8 +1,6 @@
 const Discord = require('discord.js');
-const ColorThief = require("../../color-thief.js")
 const fetch = require('node-fetch');
 const Distube = require('distube')
-const { createCanvas, loadImage } = require('canvas');
 const Jimp = require('jimp');
 
 module.exports = {

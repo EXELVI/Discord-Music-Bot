@@ -82,7 +82,7 @@ client.on("interactionCreate", async (interaction) => {
 
 
     if (comando?.inVoiceChannel && !interaction.member.voice.channel) {
-        return interaction.channel.send(`${client.emotes.error} | You must be in a voice channel!`)
+        return interaction.reply({ content: ":x: | You must be in a voice channel to use this command", ephemeral: true })
     }
     await comando.execute(interaction, client);
 })
@@ -97,10 +97,6 @@ process.on("unhandledRejection", err => {
 
 
 //Distube 
-
-const status = queue =>
-    `Volume: \`${queue.volume}%\` | Filter: \`${queue.filters.names.join(', ') || 'Off'}\` | Loop: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'All Queue' : 'This Song') : 'Off'
-    }\` | Autoplay: \`${queue.autoplay ? 'On' : 'Off'}\``
 client.distube
     .on('playSong', (queue, song) =>
         queue.textChannel.send(

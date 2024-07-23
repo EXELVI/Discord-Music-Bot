@@ -22,7 +22,9 @@ module.exports = {
             .setDescription("All the commands that you can use in the general category")
             .setColor("Navy")
 
-        client.commands.forEach(command => {
+        var commands = client.commands.sort((a, b) => a.name.localeCompare(b.name))
+
+        commands.forEach(command => {
             if (command.category == "music")
                 page1commands.push({ name: `</${command.name}:${commandsid.find(c => c.name == command.name)?.id}>`, value: command.description })
             if (command.category == "general")
@@ -50,7 +52,7 @@ module.exports = {
 
         interaction.reply({ embeds: [eval("page" + page.toString())], components: [row] })
             .then(msg => {
-                const collector = msg.createMessageComponentCollector()
+                const collector = msg.createMessageComponentCollector({ filter: i => i.isButton(), time: 120000 })
 
                 collector.on("collect", async i => {
                     i.deferUpdate()
