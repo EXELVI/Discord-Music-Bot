@@ -98,17 +98,54 @@ process.on("unhandledRejection", err => {
 
 //Distube 
 client.distube
-    .on('playSong', (queue, song) =>
-        queue.textChannel.send(
+    .on('playSong', (queue, song) =>{
+        
+        const volumeButton = new Discord.ButtonBuilder()
+            .setCustomId('volume')
+            .setEmoji('🔊')
+            .setLabel(queue.volume + '%')
+            .setStyle('Secondary')
+            .setDisabled(true)
+
+        const pauseButton = new Discord.ButtonBuilder()
+            .setCustomId('pause')
+            .setEmoji('⏸')
+            .setLabel(queue.paused ? 'Resume' : 'Pause')
+            .setStyle('Secondary')
+
+        const loopButton = new Discord.ButtonBuilder()
+            .setCustomId('loop')
+            .setEmoji('🔁')
+            .setLabel(queue.repeatMode ? (queue.repeatMode === 2 ? 'All Queue' : 'This Song') : 'Off')
+            .setStyle('Secondary')
+
+        const autoplayButton = new Discord.ButtonBuilder()
+            .setCustomId('autoplay')
+            .setEmoji('🔄')
+            .setLabel(queue.autoplay ? 'On' : 'Off')
+            .setStyle(queue.autoplay ? 'Primary' : 'Secondary')
+
+        const queueButton = new Discord.ButtonBuilder()
+            .setCustomId('queue')
+            .setEmoji('📜')
+            .setLabel(queue.songs.length + ' songs')
+            .setStyle('Secondary')
+
+        const row = new Discord.ActionRowBuilder()
+            .addComponents(volumeButton, pauseButton, loopButton, autoplayButton, queueButton)
+
+
+         queue.textChannel.send(
             {
                 embeds: [new Discord.EmbedBuilder()
                     .setTitle(`${client.emotes.play} Playing`)
                     .setURL(song.url)
                     .setDescription(`${song.name}`)
                     .setImage(song.thumbnail)
-                    .addFields({ name: ' Duration', value: `${song.formattedDuration}`, inline: true }, { name: 'Requested by', value: `${song.user}`, inline: true })]
+                    .addFields({ name: ' Duration', value: `${song.formattedDuration}`, inline: true }, { name: 'Requested by', value: `${song.user}`, inline: true })],
+                     components: [row]
             })
-    )
+    }   )
     .on('addSong', (queue, song) => {
         var embed = new Discord.EmbedBuilder()
             .setTitle(`${client.emotes.play} Added to the queue`)
@@ -126,10 +163,13 @@ client.distube
                 embeds: [new Discord.EmbedBuilder()
                     .setTitle(`${client.emotes.play} Added to the queue`)
                     .setDescription(`${playlist.name}`)
-                    .addFields({ name: 'Duration', value: `${playlist.duration}`, inline: true }, { name: "Songs", value: playlist.songs.length, inline: true }, { name: 'Requested by', value: `${playlist.user}`, inline: true })]
+                    .addFields({ name: 'Duration', value: `${playlist.duration}`, inline: true }, { name: "Songs", value: "" + playlist.songs.length, inline: true }, { name: 'Requested by', value: `${playlist.user}`, inline: true })
+                    .setImage(playlist.thumbnail)
+                .setURL(playlist.url)]
             }))
     .on('error', (channel, e) => {
         console.error(e)
+        console.log(channel)
         if (channel) channel.send(`${client.emotes.error} | There was an error: \`${e.message.slice(0, 1900)}\``)
     })
     .on('empty', channel => channel.send('Channel is empty, leaving the channel'))

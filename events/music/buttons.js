@@ -130,9 +130,9 @@ module.exports = {
             let songsList = ""
             for (let i = 10 * (page - 1); i < 10 * page; i++) {
                 if (queue.songs[i]) {
-                 songsList += `${i + 1}. ${i == 0 ? "__" : " "}**${queue.songs[i].name.length <= 63 ? queue.songs[i].name : `${queue.songs[i].name.slice(0, 63)}...`}** - ${queue.songs[i].formattedDuration} ${i == 0 ? "__" : " "}\r`
+                  songsList += `${i + 1}. ${i == 0 ? "__" : " "}**[${queue.songs[i].name.length <= 63 ? queue.songs[i].name : `${queue.songs[i].name.slice(0, 63)}...`}](${queue.songs[i].url})** - ${queue.songs[i].formattedDuration} ${i == 0 ? "__" : " "}\r`
                 }
-            }
+              }
 
             let embed = new Discord.EmbedBuilder()
                 .addFields({ name: "Queue", value: songsList })
