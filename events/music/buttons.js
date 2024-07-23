@@ -44,7 +44,7 @@ module.exports = {
             .setCustomId('autoplay')
             .setEmoji('🔄')
             .setLabel(queue.autoplay ? 'On' : 'Off')
-            .setStyle('Secondary')
+            .setStyle(queue.autoplay ? 'Primary' : 'Secondary')
 
         const queueButton = new Discord.ButtonBuilder()
             .setCustomId('queue')
@@ -98,23 +98,31 @@ module.exports = {
             if (queue.paused) {
                 queue.resume()
                 pauseButton.setLabel('Pause')
+                pauseButton.setEmoji('⏸')
+                interaction.deferUpdate()
                 return interaction.message.edit({ components: [new Discord.ActionRowBuilder().addComponents(volumeButton, pauseButton, loopButton, autoplayButton, queueButton)] })
             } else {
                 queue.pause()
                 pauseButton.setLabel('Resume')
+                pauseButton.setEmoji('▶')
+                interaction.deferUpdate()
                 return interaction.message.edit({ components: [new Discord.ActionRowBuilder().addComponents(volumeButton, pauseButton, loopButton, autoplayButton, queueButton)] })
             }
-            interaction.deferUpdate()
+          
         } else if (interaction.customId == "autoplay") {
             queue.toggleAutoplay()
             if (queue.autoplay) {
                 autoplayButton.setLabel('On')
+                autoplayButton.setStyle('Primary')
+                interaction.deferUpdate()
                 return interaction.message.edit({ components: [new Discord.ActionRowBuilder().addComponents(volumeButton, pauseButton, loopButton, autoplayButton, queueButton)] })
             } else {
                 autoplayButton.setLabel('Off')
+                autoplayButton.setStyle('Secondary')
+                interaction.deferUpdate()
                 return interaction.message.edit({ components: [new Discord.ActionRowBuilder().addComponents(volumeButton, pauseButton, loopButton, autoplayButton, queueButton)] })
             }
-            interaction.deferUpdate()
+
         } else if (interaction.customId == "queue") {
             let totPage = Math.ceil(queue.songs.length / 10)
             let page = 1
@@ -122,7 +130,7 @@ module.exports = {
             let songsList = ""
             for (let i = 10 * (page - 1); i < 10 * page; i++) {
                 if (queue.songs[i]) {
-                    songsList += `${i + 1}. **${queue.songs[i].name.length <= 100 ? queue.songs[i].name : `${queue.songs[i].name.slice(0, 100)}...`}** - ${queue.songs[i].formattedDuration}\r`
+                 songsList += `${i + 1}. ${i == 0 ? "__" : " "}**${queue.songs[i].name.length <= 63 ? queue.songs[i].name : `${queue.songs[i].name.slice(0, 63)}...`}** - ${queue.songs[i].formattedDuration} ${i == 0 ? "__" : " "}\r`
                 }
             }
 

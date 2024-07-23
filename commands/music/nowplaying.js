@@ -56,7 +56,6 @@ module.exports = {
       palette = [[255, 255, 255]]; // Example: white
     }
 
-    console.log(palette);
     const embed = new Discord.EmbedBuilder()
       .setTitle(song.name)
       .setURL(song.url)

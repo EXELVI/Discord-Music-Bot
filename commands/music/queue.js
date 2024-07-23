@@ -1,9 +1,10 @@
 const Discord = require('discord.js');
+const { inVoiceChannel } = require('./pause');
 
 module.exports = {
   name: 'queue',
   description: "Shows the queue",
-  tipo: "music",
+  category: "music",
   async execute(interaction, client) {
     const queue = client.distube.getQueue(interaction)
     if (!queue) return interaction.reply(":x: | There is nothing playing!")
@@ -14,7 +15,7 @@ module.exports = {
     let songsList = ""
     for (let i = 10 * (page - 1); i < 10 * page; i++) {
       if (queue.songs[i]) {
-        songsList += `${i + 1}. **${queue.songs[i].name.length <= 100 ? queue.songs[i].name : `${queue.songs[i].name.slice(0, 100)}...`}** - ${queue.songs[i].formattedDuration}\r`
+        songsList += `${i + 1}. ${i == 0 ? "__" : " "}**${queue.songs[i].name.length <= 63 ? queue.songs[i].name : `${queue.songs[i].name.slice(0, 63)}...`}** - ${queue.songs[i].formattedDuration} ${i == 0 ? "__" : " "}\r`
       }
     }
 
