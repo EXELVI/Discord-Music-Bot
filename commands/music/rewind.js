@@ -2,13 +2,13 @@ const Discord = require('discord.js');
 const { options } = require('./skipto');
 
 module.exports = {
-  name: 'forward',
+  name: 'rewind',
   inVoiceChannel: true,
-  description: "Forward the song for a specific amount of time",
+  description: "Rewind the song for a specific amount of time",
  category: "music",
   options: [{
     name: "seconds",
-    description: "The amount of seconds to forward",
+    description: "The amount of seconds to rewind",
     required: true,
     type: 4,
   }],
@@ -18,8 +18,8 @@ module.exports = {
     const seconds = interaction.options.getInteger("seconds")
     if (isNaN(seconds)) return interaction.reply(":x: | Invalid seconds!")
     try {
-      await queue.seek(queue.currentTime + seconds * 1000)
-      interaction.reply({ embeds: [ new Discord.EmbedBuilder().setTitle('Forward').setDescription(`Forwarded ${seconds} seconds!`) ] })
+      await queue.seek(queue.currentTime - time)
+      interaction.reply({ embeds: [ new Discord.EmbedBuilder().setTitle('Rewind').setDescription(`Rewinded ${seconds} seconds!`) ] })
     } catch (e) {
       interaction.reply(`:x: | Error: \`${e.message.slice(0, 100)}\``)
     }

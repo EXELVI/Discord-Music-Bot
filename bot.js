@@ -169,10 +169,9 @@ client.distube
             }))
     .on('error', (channel, e) => {
         console.error(e)
-        console.log(channel)
         if (channel) channel.send(`${client.emotes.error} | There was an error: \`${e.message.slice(0, 1900)}\``)
     })
-    .on('empty', channel => channel.send('Channel is empty, leaving the channel'))
+    .on('empty', msg => msg.channel.send('Channel is empty, leaving the channel'))
     .on('searchNoResult', (message, query) => message.channel.send(`${client.emotes.error} |  No result found for ${query}!`))
     .on('finish', queue => queue.textChannel.send('Finished!'))
 

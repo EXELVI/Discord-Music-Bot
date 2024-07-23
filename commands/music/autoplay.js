@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 
 module.exports = {
   name: 'autoplay',
+  description: "Toggle autoplay",
   inVoiceChannel: true,
   category: "music",
   async execute(interaction, client) {
