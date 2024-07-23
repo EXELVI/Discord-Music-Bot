@@ -7,7 +7,7 @@ module.exports = {
   category: "music",
   options: [{
     name: 'number',
-    description: "The number of the song in the queue",
+    description: "The number of songs to skip (you can also use negative numbers to go back)",
     required: true,
     type: 4,
   }],
