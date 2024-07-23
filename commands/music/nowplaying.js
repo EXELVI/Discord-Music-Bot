@@ -29,7 +29,6 @@ module.exports = {
       const response = await fetch(song.thumbnail);
       if (response.ok) {
         const buffer = await response.buffer();
-        console.log(buffer);
 
         const img = await Jimp.read(buffer);
 
@@ -54,7 +53,6 @@ module.exports = {
         palette = [[255, 255, 255]]; // Example: white
       }
     } catch (e) {
-      console.log(e);
       palette = [[255, 255, 255]]; // Example: white
     }
 
