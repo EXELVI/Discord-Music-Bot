@@ -4,7 +4,7 @@ module.exports = {
   name: "playnow",
   description: "Plays a song immediately skipping the queue",
   inVoiceChannel: true,
-  tipo: "music",
+  category: "music",
   options: [{
       name: 'song',
       description: "Song/url to play",

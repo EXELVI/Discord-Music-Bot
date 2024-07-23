@@ -133,8 +133,8 @@ client.distube
                     .addFields({ name: 'Duration', value: `${playlist.duration}`, inline: true }, { name: "Songs", value: playlist.songs.length, inline: true }, { name: 'Requested by', value: `${playlist.user}`, inline: true })]
             }))
     .on('error', (channel, e) => {
-        if (channel) channel.send(`${client.emotes.error} | There was an error: \`${e.slice(0, 1947)}\``)
-        else console.error(e)
+        console.error(e)
+        if (channel) channel.send(`${client.emotes.error} | There was an error: \`${e.message.slice(0, 1900)}\``)
     })
     .on('empty', channel => channel.send('Channel is empty, leaving the channel'))
     .on('searchNoResult', (message, query) => message.channel.send(`${client.emotes.error} |  No result found for ${query}!`))

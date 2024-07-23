@@ -4,7 +4,7 @@ module.exports = {
   name: "playtop",
   description: "Place a song at the top of the queue",
   inVoiceChannel: true,
-  tipo: "music",
+  category: "music",
   options: [{
       name: 'song',
       description: "Song/url to play",
