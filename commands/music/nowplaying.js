@@ -2,6 +2,9 @@ const Discord = require('discord.js');
 const ColorThief = require("../../color-thief.js")
 const fetch = require('node-fetch');
 const Distube = require('distube')
+const { createCanvas, loadImage } = require('canvas');
+const Jimp = require('jimp');
+
 module.exports = {
   name: 'nowplaying',
   aliases: ['np'],
@@ -22,15 +25,32 @@ module.exports = {
     if (!queue) return interaction.reply(":x: | There is nothing playing!")
     const song = queue.songs[0]
 
-    const colorThief = new ColorThief();
-    console.log(song.thumbnail)
+    console.log(song.thumbnail);
     let palette;
     try {
       const response = await fetch(song.thumbnail);
       if (response.ok) {
         const buffer = await response.buffer();
-        console.log(buffer)
-        palette = await colorThief.getPalette(buffer)
+        console.log(buffer);
+
+        const img = await Jimp.read(buffer);
+
+        const colors = [];
+        img.resize(10, 10).scan(0, 0, 10, 10, function (x, y, idx) {
+          const red = this.bitmap.data[idx + 0];
+          const green = this.bitmap.data[idx + 1];
+          const blue = this.bitmap.data[idx + 2];
+          colors.push([red, green, blue]);
+        });
+
+        const frequency = {};
+        colors.forEach(color => {
+          const key = color.join(',');
+          frequency[key] = (frequency[key] || 0) + 1;
+        });
+
+        palette = Object.keys(frequency).map(key => key.split(',').map(Number)).sort((a, b) => frequency[b.join(',')] - frequency[a.join(',')]);
+
       } else {
         console.log('Failed to fetch image:', response.status, response.statusText);
         palette = [[255, 255, 255]]; // Example: white
@@ -39,7 +59,7 @@ module.exports = {
       console.log(e);
       palette = [[255, 255, 255]]; // Example: white
     }
-    
+
     console.log(palette);
     const embed = new Discord.EmbedBuilder()
       .setTitle(song.name)
@@ -49,7 +69,7 @@ module.exports = {
       .addFields({ name: 'Requested by', value: song.user.toString() },
         { name: 'Duration', value: song.formattedDuration },
         { name: "Filter" + (queue.filters.length > 0 ? "s [" + queue.filters.length + "]" : ""), value: queue.filters.names.map(f => `\`f\``).join("\n ") || "Off" },)
-      .setThumbnail(song.thumbnail)
+      .setImage(song.thumbnail)
 
     const volumeButton = new Discord.ButtonBuilder()
       .setCustomId('volume')
@@ -76,8 +96,16 @@ module.exports = {
       .setLabel(queue.autoplay ? 'On' : 'Off')
       .setStyle('Secondary')
 
+    const queueButton = new Discord.ButtonBuilder()
+      .setCustomId('queue')
+      .setEmoji('📜')
+      .setLabel(queue.songs.length + ' songs')
+      .setStyle('Secondary')
+
+
+
     const row = new Discord.ActionRowBuilder()
-      .addComponents(volumeButton, pauseButton, loopButton, autoplayButton)
+      .addComponents(volumeButton, pauseButton, loopButton, autoplayButton, queueButton)
 
     interaction.reply({ embeds: [embed], components: [row] })
 
