@@ -25,12 +25,12 @@ module.exports = {
     let button1 = new Discord.ButtonBuilder()
       .setLabel("Previous")
       .setStyle(1)
-      .setCustomId("previous")
+      .setCustomId("queue|previous")
 
     let button2 = new Discord.ButtonBuilder()
       .setLabel("Next")
       .setStyle(1)
-      .setCustomId("next")
+      .setCustomId("queue|next")
 
     if (page == 1) button1.setDisabled()
     if (page == totPage) button2.setDisabled()

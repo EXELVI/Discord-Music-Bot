@@ -11,7 +11,7 @@ module.exports = {
     async execute(interaction, client) {
 
         if (!interaction.isButton()) return;
-        if (!interaction.customId.startsWith("loop|")) return;
+        if (!interaction.customId.startsWith("queue|")) return;
         /**
             * @type {Distube.Queue}
             * */
@@ -21,13 +21,17 @@ module.exports = {
 
         interaction.deferUpdate()
 
+        let totPage = Math.ceil(queue.songs.length / 10)
+        console.log(totPage)
+        let page = interaction.message.embeds[0].footer.text.split("/")[0]
+
           if (interaction.user.id != interaction.user.id) return interaction.reply({ content: "You can't use this button!", ephemeral: true })
 
-          if (interaction.customId == "previous") {
+          if (interaction.customId == "queue|previous") {
             page--
             if (page < 1) page = 1
           }
-          if (interaction.customId == "next") {
+          if (interaction.customId == "queue|next") {
             page++
             if (page > totPage) page = totPage
           }

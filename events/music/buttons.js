@@ -52,7 +52,7 @@ module.exports = {
             .setLabel(queue.songs.length + ' songs')
             .setStyle('Secondary')
 
-
+        
 
         if (interaction.customId == "loop") {
             let embed = new Discord.EmbedBuilder()
@@ -104,6 +104,7 @@ module.exports = {
                 pauseButton.setLabel('Resume')
                 return interaction.message.edit({ components: [new Discord.ActionRowBuilder().addComponents(volumeButton, pauseButton, loopButton, autoplayButton, queueButton)] })
             }
+            interaction.deferUpdate()
         } else if (interaction.customId == "autoplay") {
             queue.toggleAutoplay()
             if (queue.autoplay) {
@@ -113,13 +114,40 @@ module.exports = {
                 autoplayButton.setLabel('Off')
                 return interaction.message.edit({ components: [new Discord.ActionRowBuilder().addComponents(volumeButton, pauseButton, loopButton, autoplayButton, queueButton)] })
             }
+            interaction.deferUpdate()
         } else if (interaction.customId == "queue") {
+            let totPage = Math.ceil(queue.songs.length / 10)
+            let page = 1
+
+            let songsList = ""
+            for (let i = 10 * (page - 1); i < 10 * page; i++) {
+                if (queue.songs[i]) {
+                    songsList += `${i + 1}. **${queue.songs[i].name.length <= 100 ? queue.songs[i].name : `${queue.songs[i].name.slice(0, 100)}...`}** - ${queue.songs[i].formattedDuration}\r`
+                }
+            }
+
             let embed = new Discord.EmbedBuilder()
-                .setTitle("Queue")
-                .setDescription(queue.songs.map((song, i) => {
-                    return `**${i + 1}**. [${song.name}](${song.url}) - \`${song.formattedDuration}\``
-                }).join('\n'))
-            interaction.reply({ embeds: [embed] })
+                .addFields({ name: "Queue", value: songsList })
+                .setFooter({ text: `Page ${page}/${totPage}` })
+
+            let button1 = new Discord.ButtonBuilder()
+                .setLabel("Previous")
+                .setStyle(1)
+                .setCustomId("queue|previous")
+
+            let button2 = new Discord.ButtonBuilder()
+                .setLabel("Next")
+                .setStyle(1)
+                .setCustomId("queue|next")
+
+            if (page == 1) button1.setDisabled()
+            if (page == totPage) button2.setDisabled()
+
+            let row = new Discord.ActionRowBuilder()
+                .addComponents(button1)
+                .addComponents(button2)
+
+            interaction.reply({ embeds: [embed], components: [row] })
         }
 
     },
