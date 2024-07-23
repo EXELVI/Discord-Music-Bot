@@ -19,60 +19,47 @@ module.exports = {
         if (!queue) return interaction.reply({ content: ":x: | There is nothing playing!", ephemeral: true })
         const song = queue.songs[0]
 
-        let repeatMode = interaction.customId.split("|")[1]
-
-        let embed = new Discord.EmbedBuilder()
-            .setTitle("Repeat Mode")
-
-        let button1 = new Discord.ButtonBuilder()
-            .setLabel("Off")
-            .setStyle(2)
-            .setCustomId("loop|off")
-
-        let button2 = new Discord.ButtonBuilder()
-            .setLabel("Song")
-            .setStyle(2)
-            .setCustomId("loop|song")
-
-        let button3 = new Discord.ButtonBuilder()
-            .setLabel("Queue")
-            .setStyle(2)
-            .setCustomId("loop|queue")
-
         interaction.deferUpdate()
-        console.log(interaction.message)
 
-        let mode = null
-        switch (repeatMode) {
-            case 'off':
-                mode = 0
-                button1.setStyle(3)
-                button2.setStyle(2)
-                button3.setStyle(2)
-                break
-            case 'song':
-                mode = 1
-                button2.setStyle(3)
-                button1.setStyle(2)
-                button3.setStyle(2)
-                break
-            case 'queue':
-                mode = 2
-                button3.setStyle(3)
-                button2.setStyle(2)
-                button1.setStyle(2)
-                break
-        }
-        mode = queue.setRepeatMode(mode)
-        mode = mode ? (mode === 2 ? 'Queue' : 'Song') : 'Off'
+          if (interaction.user.id != interaction.user.id) return interaction.reply({ content: "You can't use this button!", ephemeral: true })
 
-        row = new Discord.ActionRowBuilder()
+          if (interaction.customId == "previous") {
+            page--
+            if (page < 1) page = 1
+          }
+          if (interaction.customId == "next") {
+            page++
+            if (page > totPage) page = totPage
+          }
+
+          let songsList = ""
+          for (let interaction = 10 * (page - 1); interaction < 10 * page; interaction++) {
+            if (queue.songs[interaction]) {
+              songsList += `${interaction + 1}. **${queue.songs[interaction].name.length <= 100 ? queue.songs[interaction].name : `${queue.songs[interaction].name.slice(0, 100)}...`}** - ${queue.songs[interaction].formattedDuration}\r`
+            }
+          }
+
+          let embed = new Discord.EmbedBuilder()
+          .addFields({ name: "Queue", value: songsList }, { name: "Page", value: `${page}/${totPage}` })
+
+          let button1 = new Discord.ButtonBuilder()
+            .setLabel("Previous")
+            .setStyle(1)
+            .setCustomId("previous")
+
+          let button2 = new Discord.ButtonBuilder()
+            .setLabel("Next")
+            .setStyle(1)
+            .setCustomId("Next")
+
+          if (page == 1) button1.setDisabled()
+          if (page == totPage) button2.setDisabled()
+
+          let row = new Discord.ActionRowBuilder()
             .addComponents(button1)
             .addComponents(button2)
-            .addComponents(button3)
 
-
-        interaction.message.edit({ embeds: [embed], components: [row] })
+          interaction.editReply({ embeds: [embed], components: [row] })
 
 
     },

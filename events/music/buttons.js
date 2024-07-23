@@ -95,7 +95,7 @@ module.exports = {
 
             interaction.reply({ embeds: [embed], components: [row] })
         } else if (interaction.customId == "pause") {
-            if (queue.paused) { 
+            if (queue.paused) {
                 queue.resume()
                 pauseButton.setLabel('Pause')
                 return interaction.message.edit({ components: [new Discord.ActionRowBuilder().addComponents(volumeButton, pauseButton, loopButton, autoplayButton, queueButton)] })
@@ -104,6 +104,22 @@ module.exports = {
                 pauseButton.setLabel('Resume')
                 return interaction.message.edit({ components: [new Discord.ActionRowBuilder().addComponents(volumeButton, pauseButton, loopButton, autoplayButton, queueButton)] })
             }
+        } else if (interaction.customId == "autoplay") {
+            queue.toggleAutoplay()
+            if (queue.autoplay) {
+                autoplayButton.setLabel('On')
+                return interaction.message.edit({ components: [new Discord.ActionRowBuilder().addComponents(volumeButton, pauseButton, loopButton, autoplayButton, queueButton)] })
+            } else {
+                autoplayButton.setLabel('Off')
+                return interaction.message.edit({ components: [new Discord.ActionRowBuilder().addComponents(volumeButton, pauseButton, loopButton, autoplayButton, queueButton)] })
+            }
+        } else if (interaction.customId == "queue") {
+            let embed = new Discord.EmbedBuilder()
+                .setTitle("Queue")
+                .setDescription(queue.songs.map((song, i) => {
+                    return `**${i + 1}**. [${song.name}](${song.url}) - \`${song.formattedDuration}\``
+                }).join('\n'))
+            interaction.reply({ embeds: [embed] })
         }
 
     },
