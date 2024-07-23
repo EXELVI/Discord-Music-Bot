@@ -24,7 +24,7 @@ module.exports = {
 
         client.commands.forEach(command => {
             if (command.category == "music")
-                page1commands.push({ name: `</${command.name}:${commandsid.find(c => c.name == command.name)?.id}>` , value: command.description })
+                page1commands.push({ name: `</${command.name}:${commandsid.find(c => c.name == command.name)?.id}>`, value: command.description })
             if (command.category == "general")
                 page2commands.push({ name: `</${command.name}:${commandsid.find(c => c.name == command.name)?.id}>`, value: command.description })
         })
