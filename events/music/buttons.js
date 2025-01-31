@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Distube = require('distube');
-const pause = require('../../commands/music/pause');
+
 module.exports = {
     name: "interactionCreate",
     /**
@@ -16,7 +16,6 @@ module.exports = {
         /**
             * @type {Distube.Queue}
             * */
-        //all replies are ephemeral
         const queue = client.distube.getQueue(interaction)
         if (!queue) return interaction.reply({ content: ":x: | There is nothing playing!", ephemeral: true })
         const song = queue.songs[0]
@@ -52,48 +51,36 @@ module.exports = {
             .setLabel(queue.songs.length + ' songs')
             .setStyle('Secondary')
 
-        
+
 
         if (interaction.customId == "loop") {
-            let embed = new Discord.EmbedBuilder()
-                .setTitle("Repeat Mode")
 
-            let button1 = new Discord.ButtonBuilder()
-                .setLabel("Off")
-                .setStyle(2)
-                .setCustomId("loop|off")
-
-            let button2 = new Discord.ButtonBuilder()
-                .setLabel("Song")
-                .setStyle(2)
-                .setCustomId("loop|song")
-
-            let button3 = new Discord.ButtonBuilder()
-                .setLabel("Queue")
-                .setStyle(2)
-                .setCustomId("loop|queue")
 
 
             switch (queue.repeatMode) {
                 case 0:
-                    button1.setStyle(3)
+                    queue.setRepeatMode(1)
+                    loopButton.setLabel('This Song')
+                    loopButton.setStyle('Primary')
+                    interaction.deferUpdate()
+                    return interaction.message.edit({ components: [new Discord.ActionRowBuilder().addComponents(volumeButton, pauseButton, loopButton, autoplayButton, queueButton)] })
                     break;
                 case 1:
-                    button2.setStyle(3)
+                    queue.setRepeatMode(2)
+                    loopButton.setLabel('All Queue')
+                    loopButton.setStyle('Primary')
+                    interaction.deferUpdate()
+                    return interaction.message.edit({ components: [new Discord.ActionRowBuilder().addComponents(volumeButton, pauseButton, loopButton, autoplayButton, queueButton)] })
                     break;
                 case 2:
-                    button3.setStyle(3)
+                    queue.setRepeatMode(0)
+                    loopButton.setLabel('Off')
+                    loopButton.setStyle('Secondary')
+                    interaction.deferUpdate()
+                    return interaction.message.edit({ components: [new Discord.ActionRowBuilder().addComponents(volumeButton, pauseButton, loopButton, autoplayButton, queueButton)] })
                     break;
             }
 
-
-            let row = new Discord.ActionRowBuilder()
-                .addComponents(button1)
-                .addComponents(button2)
-                .addComponents(button3)
-
-
-            interaction.reply({ embeds: [embed], components: [row] })
         } else if (interaction.customId == "pause") {
             if (queue.paused) {
                 queue.resume()
@@ -108,7 +95,6 @@ module.exports = {
                 interaction.deferUpdate()
                 return interaction.message.edit({ components: [new Discord.ActionRowBuilder().addComponents(volumeButton, pauseButton, loopButton, autoplayButton, queueButton)] })
             }
-          
         } else if (interaction.customId == "autoplay") {
             queue.toggleAutoplay()
             if (queue.autoplay) {
@@ -124,19 +110,26 @@ module.exports = {
             }
 
         } else if (interaction.customId == "queue") {
-            let totPage = Math.ceil(queue.songs.length / 10)
-            let page = 1
+            const PAGE_SIZE = 10;
+            const totalPages = Math.ceil(queue.songs.length / PAGE_SIZE);
+            let currentPage = 1;
 
-            let songsList = ""
-            for (let i = 10 * (page - 1); i < 10 * page; i++) {
-                if (queue.songs[i]) {
-                  songsList += `${i + 1}. ${i == 0 ? "__" : " "}**[${queue.songs[i].name.length <= 63 ? queue.songs[i].name : `${queue.songs[i].name.slice(0, 63)}...`}](${queue.songs[i].url})** - ${queue.songs[i].formattedDuration} ${i == 0 ? "__" : " "}\r`
-                }
-              }
+            const getSongsList = (page) => {
+                return queue.songs
+                    .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+                    .map((song, index) => {
+                        const songNumber = (PAGE_SIZE * (page - 1)) + index + 1;
+                        const songName = song.name.length > 63 ? `${song.name.slice(0, 63)}...` : song.name;
+                        const isNowPlaying = index === 0;
+                        return `${songNumber}. ${isNowPlaying ? "__" : " "}` +
+                            `**[${songName}](${song.url})** - ${song.formattedDuration} ${isNowPlaying ? "__" : " "}`;
+                    })
+                    .join('\r');
+            };
 
-            let embed = new Discord.EmbedBuilder()
-                .addFields({ name: "Queue", value: songsList })
-                .setFooter({ text: `Page ${page}/${totPage}` })
+            let embed = new EmbedBuilder()
+                .addFields({ name: "Queue", value: getSongsList(currentPage) })
+                .setFooter({ text: `Page ${currentPage}/${totalPages}` });
 
             let button1 = new Discord.ButtonBuilder()
                 .setLabel("Previous")
@@ -157,7 +150,5 @@ module.exports = {
 
             interaction.reply({ embeds: [embed], components: [row] })
         }
-
     },
-
-};
+}; 

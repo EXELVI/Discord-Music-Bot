@@ -1,45 +1,49 @@
-const Discord = require('discord.js');
-const { inVoiceChannel } = require('./pause');
+const { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 
 module.exports = {
   name: 'queue',
   description: "Shows the queue",
   category: "music",
   async execute(interaction, client) {
-    const queue = client.distube.getQueue(interaction)
-    if (!queue) return interaction.reply(":x: | There is nothing playing!")
+    const queue = client.distube.getQueue(interaction);
+    if (!queue) return interaction.reply(":x: | There is nothing playing!");
 
-    let totPage = Math.ceil(queue.songs.length / 10)
-    let page = 1
+    const PAGE_SIZE = 10;
+    const totalPages = Math.ceil(queue.songs.length / PAGE_SIZE);
+    let currentPage = 1;
 
-    let songsList = ""
-    for (let i = 10 * (page - 1); i < 10 * page; i++) {
-      if (queue.songs[i]) {
-        songsList += `${i + 1}. ${i == 0 ? "__" : " "}**[${queue.songs[i].name.length <= 63 ? queue.songs[i].name : `${queue.songs[i].name.slice(0, 63)}...`}](${queue.songs[i].url})** - ${queue.songs[i].formattedDuration} ${i == 0 ? "__" : " "}\r`
-      }
-    }
+    const getSongsList = (page) => {
+      return queue.songs
+        .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+        .map((song, index) => {
+          const songNumber = (PAGE_SIZE * (page - 1)) + index + 1;
+          const songName = song.name.length > 63 ? `${song.name.slice(0, 63)}...` : song.name;
+          const isNowPlaying = index === 0;
+          return `${songNumber}. ${isNowPlaying ? "__" : " "}` +
+                 `**[${songName}](${song.url})** - ${song.formattedDuration} ${isNowPlaying ? "__" : " "}`;
+        })
+        .join('\r');
+    };
 
-    let embed = new Discord.EmbedBuilder()
-      .addFields({ name: "Queue", value: songsList })
-      .setFooter({ text: `Page ${page}/${totPage}` })
+    const embed = new EmbedBuilder()
+      .addFields({ name: "Queue", value: getSongsList(currentPage) || "Error" })
+      .setFooter({ text: `Page ${currentPage}/${totalPages}` });
 
-    let button1 = new Discord.ButtonBuilder()
+    const previousButton = new ButtonBuilder()
       .setLabel("Previous")
-      .setStyle(1)
+      .setStyle(ButtonStyle.Primary)
       .setCustomId("queue|previous")
+      .setDisabled(currentPage === 1);
 
-    let button2 = new Discord.ButtonBuilder()
+    const nextButton = new ButtonBuilder()
       .setLabel("Next")
-      .setStyle(1)
+      .setStyle(ButtonStyle.Primary)
       .setCustomId("queue|next")
+      .setDisabled(currentPage === totalPages);
 
-    if (page == 1) button1.setDisabled()
-    if (page == totPage) button2.setDisabled()
+    const row = new ActionRowBuilder()
+      .addComponents(previousButton, nextButton);
 
-    let row = new Discord.ActionRowBuilder()
-      .addComponents(button1)
-      .addComponents(button2)
-
-      interaction.reply({ embeds: [embed], components: [row] })
+    interaction.reply({ embeds: [embed], components: [row] });
   }
-}
+};

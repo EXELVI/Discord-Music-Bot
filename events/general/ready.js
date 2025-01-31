@@ -13,7 +13,7 @@ const ascii = [
     `888   "   888 Y88b 888      X88 888 Y88b.    `,
     `888       888  "Y88888  88888P' 888  "Y8888P `
 ]
-
+ 
 function fadeColors(colors) {
     const startColor = [255, 0, 0];
     const endColor = [0, 0, 255];
@@ -40,75 +40,67 @@ module.exports = {
     execute: async (client) => {
         console.log("Bot is ready!");
         colors.enable();
-        console.log(colors.green(`-- ONLINE --`));
+        console.log(colors.green("-- ONLINE --"));
         fadeColors(ascii);
-        console.log(colors.blue(`
-User: ${client.user.tag}
-      
-        `))
+        console.log(colors.blue(`\nUser: ${client.user.tag}\n`));
 
-        if (process.env.commands != "false") {
+        if (process.env.commands !== "false") {
+            try {
+                console.log("Starting commands creation!");
 
-            const globalCommands = []
+                const globalCommands = [];
+                const rest = new Discord.REST().setToken(process.env.token);
+                const db = JSON.parse(fs.readFileSync("./commands.json", "utf-8"));
 
-            console.log("Starting commands creation!")
-            let guildCommands = []
+                for (const command of client.commands.values()) {
+                    const data = {
+                        name: command.name,
+                        description: `${command.onlyStaff ? "🔒 " : ""}${command.description}`,
+                        ...(command.options && { options: command.options }),
+                        ...(command.integration_types && { integration_types: command.integration_types }),
+                        ...(command.contexts && { contexts: command.contexts }),
+                    };
 
-            await client.commands
-                .forEach(async command => {
-                    let data = command.data || {}
-                    data.name = command.name
-                    data.description = (command.onlyStaff ? "🔒" : "") + command.description
-                    if (command.options) data.options = command.options
-                    if (command.integration_types) data.integration_types = command.integration_types
-                    if (command.contexts) data.contexts = command.contexts
-
-                    if (!guildCommands.find(x => x.name == command.name)) {
-                        globalCommands.push(data)
+                    if (!globalCommands.some(cmd => cmd.name === command.name)) {
+                        globalCommands.push(data);
 
                         if (command.type) {
-                            var data2 = {
+                            globalCommands.push({
                                 name: command.name,
                                 type: command.type,
-                            }
-                            if (command.integration_types) data2.integration_types = command.integration_types
-                            if (command.contexts) data2.contexts = command.contexts
-                            globalCommands.push(data2)
+                                ...(command.integration_types && { integration_types: command.integration_types }),
+                                ...(command.contexts && { contexts: command.contexts }),
+                            });
                         }
                     }
-                })
-
-            const rest = new Discord.REST().setToken(process.env.token);
-
-            console.log(`Started refreshing ${globalCommands.length} application (/) commands.`);
-
-            const data = await rest.put(
-                Discord.Routes.applicationCommands("1139163650632990721"),
-                { body: globalCommands },
-            );
-
-            console.log(`Successfully reloaded ${data.length} application (/) commands.`);
-
-            let db = JSON.parse(await fs.readFileSync("./commands.json", "utf-8"))
-
-            data.forEach(async cmd => {
-                let cmdDb = db.find(x => x.name == cmd.name)
-                if (!cmdDb) {
-                    db.push({ name: cmd.name, id: cmd.id })
-                } else {
-                    cmdDb.id = cmd.id
                 }
 
-                console.log("------------------------ Created ------------------------\n", cmd.name)
-            })
+                console.log(`Started refreshing ${globalCommands.length} application (/) commands.`);
 
-            await fs.writeFileSync("./commands.json", JSON.stringify(db, null, 2))
+                const refreshedCommands = await rest.put(
+                    Discord.Routes.applicationCommands("1139163650632990721"),
+                    { body: globalCommands },
+                );
 
+                console.log(`Successfully reloaded ${refreshedCommands.length} application (/) commands.`);
 
-            console.log("Commands created!")
-        } else console.log("Commands creation disabled!")
+                refreshedCommands.forEach(cmd => {
+                    const existingCmd = db.find(x => x.name === cmd.name);
+                    if (!existingCmd) {
+                        db.push({ name: cmd.name, id: cmd.id });
+                        console.log(`------------------------ Created ------------------------\n${cmd.name}`);
+                    } else {
+                        existingCmd.id = cmd.id;
+                    }
+                });
 
-
-
+                fs.writeFileSync("./commands.json", JSON.stringify(db, null, 2));
+                console.log("Commands created!");
+            } catch (error) {
+                console.error("Error creating commands:", error);
+            }
+        } else {
+            console.log("Commands creation disabled!");
+        }
     }
 }

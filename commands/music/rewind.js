@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const { options } = require('./skipto');
 
 module.exports = {
   name: 'rewind',
@@ -18,7 +17,7 @@ module.exports = {
     const seconds = interaction.options.getInteger("seconds")
     if (isNaN(seconds)) return interaction.reply(":x: | Invalid seconds!")
     try {
-      await queue.seek(queue.currentTime - time)
+      await queue.seek(queue.currentTime - seconds)
       interaction.reply({ embeds: [ new Discord.EmbedBuilder().setTitle('Rewind').setDescription(`Rewinded ${seconds} seconds!`) ] })
     } catch (e) {
       interaction.reply(`:x: | Error: \`${e.message.slice(0, 100)}\``)

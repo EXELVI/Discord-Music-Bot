@@ -6,49 +6,32 @@ module.exports = {
   description: "Set the repeat mode",
   category: "music",
   async execute(interaction, client) {
-    const queue = client.distube.getQueue(interaction)
-    if (!queue) return interaction.reply(":x: | There is nothing playing!")
-
-    let embed = new Discord.EmbedBuilder()
-      .setTitle("Repeat Mode")
-
-    let button1 = new Discord.ButtonBuilder()
-      .setLabel("Off")
-      .setStyle(2)
-      .setCustomId("loop|off")
-
-    let button2 = new Discord.ButtonBuilder()
-      .setLabel("Song")
-      .setStyle(2)
-      .setCustomId("loop|song")
-
-    let button3 = new Discord.ButtonBuilder()
-      .setLabel("Queue")
-      .setStyle(2)
-      .setCustomId("loop|queue")
-
-    switch (queue.repeatMode) {
-      case 0:
-        button1.setStyle(3)
-        break;
-      case 1:
-        button2.setStyle(3)
-        break;
-      case 2:
-        button3.setStyle(3)
-        break;
+    const queue = client.distube.getQueue(interaction);
+    if (!queue) {
+      return interaction.reply(":x: | There is nothing playing!");
     }
 
+    const embed = new Discord.EmbedBuilder()
+      .setTitle("🔁 Repeat Mode")
+      .setColor(queue.repeatMode === 0 ? '#FF0000' : queue.repeatMode === 1 ? '#00FF00' : '#0000FF')
+      .setDescription(`Current repeat mode: **${['Off', 'Song', 'Queue'][queue.repeatMode]}**`)
+      .setTimestamp();
 
-    let row = new Discord.ActionRowBuilder()
-      .addComponents(button1)
-      .addComponents(button2)
-      .addComponents(button3)
+    const modes = [
+      { label: 'Off', customId: 'loop|off' },
+      { label: 'Song', customId: 'loop|song' },
+      { label: 'Queue', customId: 'loop|queue' },
+    ];
 
+    const buttons = modes.map((mode, index) =>
+      new Discord.ButtonBuilder()
+        .setLabel(mode.label)
+        .setStyle(queue.repeatMode === index ? Discord.ButtonStyle.Primary : Discord.ButtonStyle.Secondary)
+        .setCustomId(mode.customId)
+    );
 
-    interaction.reply({ embeds: [embed], components: [row] })
+    const row = new Discord.ActionRowBuilder().addComponents(buttons);
 
-
-
+    interaction.reply({ embeds: [embed], components: [row] });
   }
-}
+};

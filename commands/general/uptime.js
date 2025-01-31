@@ -13,19 +13,21 @@ module.exports = {
     description: "Shows the bot's uptime",
     category: "general",
     async execute(interaction, client) {
-        var clients = await client.shard.broadcastEval(x => { return { ready: x.isReady(), ping: x.ws.ping } })
-        var fields = []
+    const uptime = client.uptime;
+    const formattedUptime = discordTimestamp(Date.now() - uptime, 'RELATIVE');
+    const ping = Math.round(client.ws.ping);
+    const memoryUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
 
-        for (var i = 0; client.shard.ids.length > i; i++) {
-            fields.push({ name: "Shard " + client.shard.ids[i], value: clients[i].ready ? ":green_circle: " + clients[i].ping + "ms" : ":red_circle:", inline: true})
-        }
+    const embed = new Discord.EmbedBuilder()
+        .setColor('#0099ff')
+        .setTitle("Uptime Information")
+        .addFields(
+            { name: 'Uptime', value: `${formattedUptime}`, inline: true },
+            { name: 'Ping', value: `${ping} ms`, inline: true },
+            { name: 'RAM Usage', value: `${memoryUsage} MB`, inline: true }
+        )
+        .setTimestamp();
 
-        const embed = new Discord.EmbedBuilder()
-            .setTitle("Bot stats")
-            .setDescription("**Uptime** " + `${discordTimestamp(new Date().getTime() - client.uptime, "Relative")}`)
-            .setFields(fields)
-
-        interaction.reply({ embeds: [embed] })
-
+    await interaction.reply({ embeds: [embed] });
     }
 }
